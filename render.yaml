@@ -1,8 +1,10 @@
+# Online multiplayer server for Hath Bolo on Render.com (free plan).
+# The build step puts the uploaded files back into their folders (www/, server/).
 services:
   - type: web
     name: hath-bolo
     runtime: node
     plan: free
-    buildCommand: cd server && npm install
+    buildCommand: "mkdir -p www/js www/css www/img server; for f in app.js config.js engine.js fx.js i18n.js; do if [ -f $f ]; then mv $f www/js/; fi; done; if [ -f style.css ]; then mv style.css www/css/; fi; for f in icon.svg icon-192.png icon-512.png apple-touch-icon.png; do if [ -f $f ]; then mv $f www/img/; fi; done; for f in index.html manifest.webmanifest sw.js; do if [ -f $f ]; then mv $f www/; fi; done; if [ -f index.js ]; then mv index.js server/; fi; if [ -f package.json ]; then mv package.json server/; fi; cd server && npm install --no-audit --no-fund"
     startCommand: node server/index.js
     healthCheckPath: /health
