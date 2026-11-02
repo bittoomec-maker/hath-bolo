@@ -1,0 +1,127 @@
+# Builds the Android app (hath-bolo.apk) on GitHub, for free.
+# Download link: https://github.com/<user>/<repo>/releases/latest/download/hath-bolo.apk
+name: Build Android APK
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      server_url:
+        description: 'Online server address, e.g. https://hath-bolo.onrender.com (optional)'
+        required: false
+        default: ''
+permissions:
+  contents: write
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: android-actions/setup-android@v3
+
+      - name: Arrange files into folders
+        run: |
+          mkdir -p www/js www/css www/img server
+          for f in app.js config.js engine.js fx.js i18n.js; do if [ -f "$f" ]; then mv "$f" www/js/; fi; done
+          if [ -f style.css ]; then mv style.css www/css/; fi
+          for f in icon.svg icon-192.png icon-512.png apple-touch-icon.png; do if [ -f "$f" ]; then mv "$f" www/img/; fi; done
+          for f in index.html manifest.webmanifest sw.js; do if [ -f "$f" ]; then mv "$f" www/; fi; done
+          if [ -f index.js ]; then mv index.js server/; fi
+          if [ -f package.json ] && grep -q hath-bolo-server package.json; then mv package.json server/; fi
+          find www -type f | sort
+
+      - name: Capacitor config
+        run: |
+          cat > capacitor.config.json <<'JSON'
+          {
+            "appId": "com.sharkdesigns.hathbolo",
+            "appName": "Hath Bolo",
+            "webDir": "www",
+            "backgroundColor": "#0b1d14",
+            "plugins": {
+              "SplashScreen": { "launchShowDuration": 1200, "launchAutoHide": false, "backgroundColor": "#0b1d14", "showSpinner": false, "androidScaleType": "CENTER_CROP" },
+              "StatusBar": { "style": "DARK", "backgroundColor": "#0b1d14", "overlaysWebView": false }
+            }
+          }
+          JSON
+
+      - name: Install Capacitor
+        run: |
+          npm init -y > /dev/null
+          npm install --no-audit --no-fund @capacitor/core@8 @capacitor/cli@8 @capacitor/android@8 @capacitor/app@8 @capacitor/haptics@8 @capacitor/share@8 @capacitor/splash-screen@8 @capacitor/status-bar@8 @capacitor/assets@4
+
+      - name: Set online server address
+        env:
+          SERVER_URL: ${{ github.event.inputs.server_url || vars.SERVER_URL }}
+        run: |
+          if [ -n "$SERVER_URL" ]; then
+            printf "window.HB_CONFIG = { serverUrl: '%s' };\n" "$SERVER_URL" > www/js/config.js
+          fi
+          cat www/js/config.js
+
+      - name: App icon and splash
+        run: |
+          mkdir -p assets
+          cat > make-assets.js <<'JS'
+          const sharp = require('sharp');
+          const fs = require('fs');
+          (async () => {
+            const svg = fs.readFileSync('www/img/icon.svg');
+            await sharp(svg, { density: 400 }).resize(1024, 1024).png().toFile('assets/icon-only.png');
+            const small = await sharp(svg, { density: 400 }).resize(900, 900).png().toBuffer();
+            const mask = Buffer.from('<svg width="900" height="900"><rect width="900" height="900" rx="180" ry="180"/></svg>');
+            const rounded = await sharp(small).composite([{ input: mask, blend: 'dest-in' }]).png().toBuffer();
+            for (const n of ['splash.png', 'splash-dark.png']) {
+              await sharp({ create: { width: 2732, height: 2732, channels: 4, background: '#0b1d14' } })
+                .composite([{ input: rounded, gravity: 'center' }]).png().toFile('assets/' + n);
+            }
+            console.log('assets ready');
+          })();
+          JS
+          node make-assets.js
+
+      - name: Create Android project
+        run: |
+          npx cap add android
+          npx capacitor-assets generate --android --iconBackgroundColor '#1b5638' --iconBackgroundColorDark '#1b5638' --splashBackgroundColor '#0b1d14' --splashBackgroundColorDark '#0b1d14'
+          npx cap sync android
+
+      - name: Signing key (kept so app updates install over old ones)
+        run: |
+          mkdir -p ~/.android ci
+          if [ ! -f ci/debug.keystore ]; then
+            keytool -genkeypair -keystore ci/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+            git config user.name "github-actions"
+            git config user.email "github-actions@users.noreply.github.com"
+            git add ci/debug.keystore
+            git commit -m "Save app signing key [skip ci]" && git push || true
+          fi
+          cp ci/debug.keystore ~/.android/debug.keystore
+
+      - name: Build APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+          cp app/build/outputs/apk/debug/app-debug.apk ../hath-bolo.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hath-bolo-apk
+          path: hath-bolo.apk
+
+      - name: Publish download link
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-latest
+          name: Hath Bolo - Android app
+          body: Download hath-bolo.apk below and open it on an Android phone to install.
+          files: hath-bolo.apk
+          make_latest: true
