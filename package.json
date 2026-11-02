@@ -1,0 +1,10 @@
+{
+  "name": "hath-bolo-server",
+  "version": "1.0.0",
+  "description": "Online multiplayer server for Hath Bolo (rooms with share codes). Also serves the web version of the game.",
+  "main": "index.js",
+  "private": true,
+  "scripts": { "start": "node index.js" },
+  "engines": { "node": ">=18" },
+  "dependencies": { "ws": "^8.18.0" }
+}

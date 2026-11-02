@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="hi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#0c1f15">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="format-detection" content="telephone=no">
+  <title>Hath Bolo</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="img/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-title" content="Hath Bolo">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- suit symbols -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <symbol id="suit-0" viewBox="0 0 100 100"><path d="M50 4C40 22 6 40 6 61c0 13 10 22 23 22 8 0 14-3 18-9-1 10-5 17-13 22h32c-8-5-12-12-13-22 4 6 10 9 18 9 13 0 23-9 23-22C94 40 60 22 50 4z"/></symbol>
+      <symbol id="suit-1" viewBox="0 0 100 100"><path d="M50 92C22 70 4 52 4 31 4 16 15 6 29 6c10 0 17 6 21 14 4-8 11-14 21-14 14 0 25 10 25 25 0 21-18 39-46 61z"/></symbol>
+      <symbol id="suit-2" viewBox="0 0 100 100"><circle cx="50" cy="27" r="20"/><circle cx="26" cy="59" r="20"/><circle cx="74" cy="59" r="20"/><circle cx="50" cy="52" r="11"/><path d="M45 55c0 18-4 31-13 41h36c-9-10-13-23-13-41z"/></symbol>
+      <symbol id="suit-3" viewBox="0 0 100 100"><path d="M50 3l38 47-38 47-38-47z"/></symbol>
+    </defs>
+  </svg>
+
+  <div id="app">
+    <!-- HOME -->
+    <section id="home" class="screen active">
+      <div class="home-inner">
+        <div class="logo-fan" aria-hidden="true">
+          <div class="lf lf1"></div><div class="lf lf2"></div><div class="lf lf3"></div><div class="lf lf4"></div>
+        </div>
+        <h1 class="brand">Hath Bolo</h1>
+        <p class="tagline" data-t="tagline"></p>
+        <div class="home-btns">
+          <button class="btn gold big" id="btnContinue" data-t="continueGame"></button>
+          <button class="btn gold big" id="btnNew" data-t="newGame"></button>
+          <button class="btn online big" id="btnOnline"><svg viewBox="0 0 24 24"><path d="M16 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm-8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm0 2c-2.7 0-8 1.3-8 4v2h16v-2c0-2.7-5.3-4-8-4zm8 0c-.3 0-.7 0-1.1.1 1.3.9 2.1 2.2 2.1 3.9v2h7v-2c0-2.7-5.3-4-8-4z"/></svg><span data-t="playFriends"></span></button>
+          <button class="btn ghost" id="btnHow" data-t="howTo"></button>
+          <div class="row2" id="installRow" style="display:none">
+            <button class="btn ghost" id="btnInstall" data-t="installApp"></button>
+            <button class="btn ghost" id="btnShareApp" data-t="shareApp"></button>
+          </div>
+          <div class="row2">
+            <button class="btn ghost" id="btnStats" data-t="stats"></button>
+            <button class="btn ghost" id="btnSettings" data-t="settings"></button>
+          </div>
+        </div>
+        <div class="lang-switch" id="homeLang">
+          <button data-lang="hi">Hinglish</button><button data-lang="en">English</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- GAME -->
+    <section id="game" class="screen">
+      <header class="topbar">
+        <button class="icon-btn" id="btnMenu" aria-label="Menu">
+          <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+        <div class="tb-title"><span class="brand-sm">Hath Bolo</span><span id="roundLabel" class="tb-round"></span></div>
+        <div style="display:flex;gap:6px">
+          <button class="icon-btn" id="btnEmote" aria-label="Chat" style="display:none"><svg viewBox="0 0 24 24"><path d="M4 5h16v10H9l-5 4z"/></svg></button>
+          <button class="icon-btn" id="btnHint" aria-label="Hint">?</button>
+        </div>
+      </header>
+
+      <div class="scorebar">
+        <div class="team-card us" id="team0">
+          <div class="tc-name"></div>
+          <div class="tc-score"><b class="pts">0</b><span class="tgt"></span></div>
+          <div class="tc-bar"><i></i></div>
+        </div>
+        <div class="team-card them" id="team1">
+          <div class="tc-name"></div>
+          <div class="tc-score"><b class="pts">0</b><span class="tgt"></span></div>
+          <div class="tc-bar"><i></i></div>
+        </div>
+      </div>
+
+      <div class="roundbar" id="roundbar"></div>
+
+      <div class="table" id="table">
+        <div class="seat seat-1" id="seat1"></div>
+        <div class="seat seat-2" id="seat2"></div>
+        <div class="seat seat-3" id="seat3"></div>
+        <div class="trick" id="trick"></div>
+        <div class="status" id="status"></div>
+      </div>
+
+      <div class="hand-zone">
+        <div class="seat seat-0" id="seat0"></div>
+        <div class="hand" id="hand"></div>
+      </div>
+
+      <div class="sheet" id="sheet"></div>
+    </section>
+
+    <div class="modal-wrap" id="modalWrap"><div class="modal" id="modal"></div></div>
+    <div class="toast" id="toast"></div>
+  </div>
+
+  <script src="js/config.js"></script>
+  <script src="js/engine.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/fx.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

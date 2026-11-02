@@ -1,0 +1,16 @@
+{
+  "name": "Hath Bolo",
+  "short_name": "Hath Bolo",
+  "description": "4-player team card game with bidding. Play with computer or online with friends.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0b1d14",
+  "theme_color": "#0b1d14",
+  "icons": [
+    { "src": "img/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "img/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
